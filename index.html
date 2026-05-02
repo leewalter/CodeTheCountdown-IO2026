@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google I/O 2026 - Code the Countdown</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Display:wght@700&family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --g-blue: #4285F4;
+            --g-red: #EA4335;
+            --g-yellow: #FBBC04;
+            --g-green: #34A853;
+            --g-bg: #FAFAFA;
+            --g-dark: #202124;
+            --g-dark-bg: #121212;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: var(--g-bg);
+            font-family: 'Google Sans Display', 'Poppins', sans-serif;
+            transition: background-color 0.5s ease;
+        }
+
+        body.dark-mode {
+            background-color: var(--g-dark-bg);
+            color: #fff;
+        }
+
+        /* Soft Animated Background */
+        .bg-mesh {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(66, 133, 244, 0.08), transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(234, 67, 53, 0.08), transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(251, 188, 4, 0.08), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(52, 168, 83, 0.08), transparent 50%);
+            z-index: 0;
+            animation: breathe 10s infinite alternate ease-in-out;
+        }
+
+        body.dark-mode .bg-mesh {
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(66, 133, 244, 0.15), transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(234, 67, 53, 0.15), transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(251, 188, 4, 0.15), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(52, 168, 83, 0.15), transparent 50%);
+        }
+
+        .bg-pattern {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(var(--g-dark) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.03;
+            z-index: 1;
+        }
+
+        body.dark-mode .bg-pattern {
+            background-image: radial-gradient(#ffffff 1px, transparent 1px);
+            opacity: 0.05;
+        }
+
+        .bg-text {
+            position: absolute;
+            font-size: 20vw;
+            font-weight: 800;
+            color: var(--g-dark);
+            opacity: 0.02;
+            white-space: nowrap;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        body.dark-mode .bg-text {
+            color: #ffffff;
+            opacity: 0.03;
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+        /* Central Number Container */
+        #number-container {
+            position: relative;
+            z-index: 10;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .animal-svg {
+            height: 65vh;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));
+            transform-origin: bottom center;
+            overflow: visible;
+        }
+
+        /* SVG Styles */
+        .g-stroke {
+            stroke: var(--g-dark);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        body.dark-mode .animal-svg {
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+        }
+        body.dark-mode .g-stroke {
+            stroke: #fff;
+        }
+
+        .fill-blue { fill: var(--g-blue); }
+        .fill-red { fill: var(--g-red); }
+        .fill-yellow { fill: var(--g-yellow); }
+        .fill-green { fill: var(--g-green); }
+        .fill-white { fill: #fff; }
+        .fill-black { fill: var(--g-dark); }
+        
+        body.dark-mode .fill-black { fill: #fff; }
+        body.dark-mode .fill-white { fill: #2a2a2a; }
+
+        /* Eye Blinking */
+        .eye-lid {
+            transform-origin: center;
+        }
+
+        /* Speech Bubble */
+        .speech-bubble {
+            position: absolute;
+            top: 15%;
+            right: 25%;
+            background: var(--g-blue);
+            color: white;
+            font-size: 2rem;
+            font-weight: 800;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 6px solid var(--g-dark);
+            opacity: 0;
+            transform: scale(0) rotate(10deg);
+            z-index: 20;
+            pointer-events: none;
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .speech-bubble {
+            border-color: #fff;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 20px;
+            border-width: 15px 15px 0 0;
+            border-style: solid;
+            border-color: var(--g-dark) transparent transparent transparent;
+        }
+
+        /* Glassmorphism Panel */
+        #control-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        body.dark-mode #control-panel {
+            background: rgba(30, 30, 30, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        #control-panel.collapsed {
+            transform: translateX(100%);
+        }
+
+        .panel-btn {
+            transition: all 0.2s;
+        }
+        .panel-btn:hover {
+            transform: scale(1.05);
+        }
+        .panel-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* I/O Logo Reveal */
+        #io-logo {
+            position: absolute;
+            font-size: 15vw;
+            font-weight: 800;
+            display: flex;
+            gap: 20px;
+            opacity: 0;
+            transform: scale(0.5);
+            z-index: 15;
+            letter-spacing: -0.05em;
+        }
+        .io-i { color: var(--g-blue); }
+        .io-slash { color: var(--g-green); }
+        .io-o { color: var(--g-yellow); }
+        .io-year { color: var(--g-red); }
+
+        /* Speed lines */
+        .speed-line {
+            position: absolute;
+            background: var(--g-dark);
+            height: 4px;
+            border-radius: 4px;
+            opacity: 0;
+            pointer-events: none;
+        }
+        body.dark-mode .speed-line { background: #fff; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Background Elements -->
+    <div class="bg-mesh"></div>
+    <div class="bg-pattern"></div>
+    <div class="bg-text">I/O 26</div>
+
+    <!-- Main Stage -->
+    <div id="number-container">
+        <!-- SVG will be injected here -->
+        <div id="speech" class="speech-bubble">HI!</div>
+        <div id="io-logo">
+            <span class="io-i">I</span>
+            <span class="io-slash">/</span>
+            <span class="io-o">O</span>
+            <span class="io-year ml-4">26</span>
+        </div>
+        
+        <!-- Animal Name Footer -->
+        <div id="animal-label" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 text-lg md:text-xl font-bold px-6 py-2 rounded-full bg-white/60 dark:bg-black/60 backdrop-blur-md shadow-sm border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 transition-colors opacity-0 pointer-events-none">
+            Giraffe & Egg
+        </div>
+    </div>
+
+    <!-- Floating Toggle Button -->
+    <button id="toggle-panel" class="fixed top-6 right-6 z-50 w-12 h-12 rounded-full bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center text-2xl hover:scale-110 transition-transform g-stroke border-2 border-[#202124] dark:border-white">
+        ⚙️
+    </button>
+
+    <!-- Side Control Panel -->
+    <div id="control-panel" class="fixed top-0 right-0 h-full w-80 p-6 flex flex-col gap-6 z-40 overflow-y-auto">
+        <h2 class="text-2xl font-bold mt-12 mb-2 text-center">Countdown</h2>
+        
+        <!-- Playback -->
+        <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <button id="btn-prev" class="panel-btn w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xl">⏮</button>
+            <button id="btn-play" class="panel-btn w-16 h-16 rounded-full bg-[#4285F4] text-white flex items-center justify-center text-3xl shadow-md border-2 border-[#202124] dark:border-white">⏸</button>
+            <button id="btn-next" class="panel-btn w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xl">⏭</button>
+        </div>
+
+        <!-- Speed -->
+        <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+                <label class="text-sm font-semibold text-gray-500 dark:text-gray-400">SPEED</label>
+                <span id="speed-display" class="text-xs font-bold text-gray-700 dark:text-gray-300">1.00x</span>
+            </div>
+            <input type="range" id="speed-slider" min="0.25" max="3" step="0.05" value="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-[#EA4335]">
+        </div>
+
+        <!-- Sound -->
+        <div class="flex flex-col gap-2">
+            <label class="text-sm font-semibold text-gray-500 dark:text-gray-400">AUDIO</label>
+            <button id="btn-sound" class="w-full py-3 rounded-xl bg-[#34A853] text-white font-bold text-lg flex items-center justify-center gap-2 shadow-md border-2 border-[#202124] dark:border-white transition-transform hover:scale-105 active:scale-95">
+                🔊 Play with Sound
+            </button>
+        </div>
+
+        <!-- Theme & Display -->
+        <div class="flex flex-col gap-2">
+            <label class="text-sm font-semibold text-gray-500 dark:text-gray-400">DISPLAY & THEME</label>
+            <div class="flex gap-2">
+                <button id="btn-theme" class="flex-1 py-2 rounded-xl bg-gray-200 dark:bg-gray-700 font-bold flex items-center justify-center gap-1 transition-colors text-sm">
+                    🌙 Dark
+                </button>
+                <button id="btn-fullscreen" class="flex-1 py-2 rounded-xl bg-gray-200 dark:bg-gray-700 font-bold flex items-center justify-center gap-1 transition-colors text-sm">
+                    🔲 Fullscreen
+                </button>
+            </div>
+        </div>
+
+        <!-- Gallery -->
+        <div class="flex flex-col gap-2 flex-grow">
+            <label class="text-sm font-semibold text-gray-500 dark:text-gray-400">GALLERY (Click to Jump)</label>
+            <div id="gallery" class="grid grid-cols-4 gap-2">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+        
+        <div class="text-xs text-center text-gray-400 mt-auto">
+            Keyboard: Space (Play/Pause), M (Mute), F (Fullscreen), Arrows<br>
+            *Try the Konami Code!*
+        </div>
+    </div>
+
+    <script>
+        /**
+         * SVG Definitions for "Animals ARE Numbers"
+         * Using viewbox 0 0 200 300 to give vertical space.
+         * The paths heavily abstract the animals into the shape of numbers.
+         */
+        const animalSVGs = {
+            10: `<!-- Giraffe (1) and Egg (0) -->
+                <svg class="animal-svg" viewBox="-50 0 300 300" id="svg-10">
+                    <!-- Egg (0) -->
+                    <g id="part-0" transform="translate(130, 100)">
+                        <ellipse cx="60" cy="100" rx="60" ry="90" class="fill-blue g-stroke" />
+                        <!-- Chick peeking -->
+                        <path d="M 30,50 Q 60,10 90,50" class="fill-yellow g-stroke" />
+                        <g class="eye"><circle cx="45" cy="40" r="6" class="fill-white g-stroke"/><circle cx="45" cy="40" r="3" class="fill-black pupil"/></g>
+                        <g class="eye"><circle cx="75" cy="40" r="6" class="fill-white g-stroke"/><circle cx="75" cy="40" r="3" class="fill-black pupil"/></g>
+                        <!-- Crack -->
+                        <polyline points="20,70 40,90 60,70 80,90 100,70" class="g-stroke" fill="none" />
+                    </g>
+                    <!-- Giraffe (1) -->
+                    <g id="part-1" transform="translate(0, 0)">
+                        <rect x="50" y="80" width="40" height="210" rx="10" class="fill-yellow g-stroke" />
+                        <!-- Head -->
+                        <path d="M 30,80 C 30,30 100,30 100,80 Z" class="fill-yellow g-stroke" />
+                        <!-- Snout -->
+                        <ellipse cx="40" cy="65" rx="15" ry="20" class="fill-yellow g-stroke" />
+                        <g class="eye"><circle cx="70" cy="50" r="8" class="fill-white g-stroke"/><circle cx="72" cy="50" r="4" class="fill-black pupil"/></g>
+                        <!-- Horns -->
+                        <line x1="60" y1="35" x2="55" y2="10" class="g-stroke" />
+                        <circle cx="55" cy="10" r="5" class="fill-yellow g-stroke" />
+                        <line x1="80" y1="35" x2="85" y2="10" class="g-stroke" />
+                        <circle cx="85" cy="10" r="5" class="fill-yellow g-stroke" />
+                        <!-- Spots -->
+                        <circle cx="70" cy="120" r="12" class="fill-red g-stroke" />
+                        <circle cx="65" cy="170" r="15" class="fill-red g-stroke" />
+                        <circle cx="75" cy="230" r="10" class="fill-red g-stroke" />
+                    </g>
+                </svg>`,
+            9: `<!-- Monkey Hanging (9) -->
+                <svg class="animal-svg" viewBox="0 0 200 300" id="svg-9">
+                    <g id="monkey-group">
+                        <!-- Tail acting as the stem of 9 -->
+                        <path d="M 160,20 Q 160,200 100,200 A 60 60 0 1 1 100,80 Q 140,80 150,140" class="g-stroke fill-red" />
+                        <!-- Head / Belly area forming loop -->
+                        <circle cx="100" cy="140" r="45" class="fill-yellow g-stroke" />
+                        <!-- Face details -->
+                        <circle cx="85" cy="130" r="15" class="fill-white g-stroke" />
+                        <circle cx="115" cy="130" r="15" class="fill-white g-stroke" />
+                        <g class="eye"><circle cx="85" cy="130" r="5" class="fill-black pupil"/></g>
+                        <g class="eye"><circle cx="115" cy="130" r="5" class="fill-black pupil"/></g>
+                        <!-- Smile upside down (hanging) -->
+                        <path d="M 85,160 Q 100,150 115,160" class="g-stroke" fill="none" />
+                        <!-- Branch -->
+                        <line x1="120" y1="20" x2="200" y2="20" class="g-stroke" stroke-width="15" />
+                        <!-- Hand holding tail to branch -->
+                        <circle cx="160" cy="20" r="12" class="fill-red g-stroke" />
+                    </g>
+                </svg>`,
+            8: `<!-- Two Owls (8) -->
+                <svg class="animal-svg" viewBox="0 0 200 300" id="svg-8">
+                    <g id="owl-top" transform="translate(100, 90)">
+                        <circle cx="0" cy="0" r="60" class="fill-green g-stroke" />
+                        <path d="M -40,-30 L -30,-60 L -10,-45 Z M 40,-30 L 30,-60 L 10,-45 Z" class="fill-green g-stroke" /> <!-- Ears -->
+                        <circle cx="-25" cy="-5" r="20" class="fill-white g-stroke" />
+                        <circle cx="25" cy="-5" r="20" class="fill-white g-stroke" />
+                        <g class="eye"><circle cx="-25" cy="-5" r="8" class="fill-black pupil"/></g>
+                        <g class="eye"><circle cx="25" cy="-5" r="8" class="fill-black pupil"/></g>
+                        <polygon points="-10,15 10,15 0,30" class="fill-yellow g-stroke" />
+                    </g>
+                    <g id="owl-bottom" transform="translate(100, 210)">
+                        <circle cx="0" cy="0" r="80" class="fill-green g-stroke" />
+                        <circle cx="-35" cy="-15" r="25" class="fill-white g-stroke" />
+                        <circle cx="35" cy="-15" r="25" class="fill-white g-stroke" />
+                        <g class="eye"><circle cx="-35" cy="-15" r="10" class="fill-black pupil"/></g>
+                        <g class="eye"><circle cx="35" cy="-15" r="10" class="fill-black pupil"/></g>
+                        <polygon points="-15,15 15,15 0,35" class="fill-yellow g-stroke" />
+                        <!-- Wings -->
+                        <path d="M -80,0 Q -110,40 -70,80 Z M 80,0 Q 110,40 70,80 Z" class="fill-yellow g-stroke" />
+                    </g>
+                </svg>`,
+            7: `<!-- Flamingo (7) -->
+                <svg class="animal-svg" viewBox="0 0 200 300" id="svg-7">
+                    <g id="flam-group">
+                        <!-- Top horizontal of 7 (Neck/Beak) -->
+                        <path d="M 40,50 L 160,50 Q 180,50 170,80" class="fill-red g-stroke" stroke-width="30" stroke-linecap="square"/>
+                        <polygon points="40,35 10,50 40,65" class="fill-yellow g-stroke" />
+                        <!-- Head base -->
+                        <circle cx="60" cy="50" r="20" class="fill-red" />
+                        <g class="eye"><circle cx="60" cy="45" r="6" class="fill-white g-stroke"/><circle cx="58" cy="45" r="3" class="fill-black pupil"/></g>
+                        
+                        <!-- Diagonal of 7 (Body/Leg) -->
+                        <path d="M 160,65 L 60,280" class="g-stroke" stroke-width="12" /> <!-- Leg 1 -->
+                        <path d="M 140,110 L 110,180 L 150,200" class="g-stroke" stroke-width="12" fill="none"/> <!-- Leg 2 curled -->
+                        <!-- Body -->
+                        <ellipse cx="140" cy="110" rx="40" ry="30" class="fill-red g-stroke" transform="rotate(25 140 110)" />
+                        <!-- Wing -->
+                        <path d="M 120,100 Q 170,120 120,140 Z" class="fill-yellow g-stroke" />
+                    </g>
+                </svg>`,
+            6: `<!-- Elephant (6) -->
+                <svg class="animal-svg" viewBox="0 0 200 300" id="svg-6">
+                    <g id="ele-group">
+                        <!-- Vertical line + loop -->
+                        <path d="M 100,30 L 100,160 A 60 60 0 1 1 50,110 Q 50,30 100,30" class="fill-blue g-stroke" />
+                        <!-- Ear -->
+                        <path d="M 100,50 C 180,20 180,150 100,120 Z" class="fill-blue g-stroke" />
+                        <!-- Eye -->
+                        <g class="eye"><circle cx="70" cy="80" r="12" class="fill-white g-stroke"/><circle cx="65" cy="80" r="5" class="fill-black pupil"/></g>
+                        <!-- Tusk -->
+                        <path d="M 50,110 Q 10,120 20,90 Z" class="fill-white g-stroke" />
+                    </g>
+                </svg>`,
+            5: `<!-- Seahorse (5) -->
+                <svg class="animal-svg" viewBox="0 0 200 300" id="svg-5">
+                    <g id="sea-group">
+                        <!-- Number 5 path -->
+                        <path d="M 150,40 L 70,40 L 70,120 Q 150,100 150,180 A 60 60 0 1 1 50,200" class="fill-yellow g-stroke" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                        <!-- Snout -->
+                        <path d="M 70,40 L 30,50 L 30,70 L 70,60" class="fill-yellow g-stroke" />
+                        <!-- Eye -->
+                        <g class="eye"><circle cx="90" cy="60" r="10" class="fill-white g-stroke"/><circle cx="85" cy="60" r="4" class="fill-black pupil"/></g>
+                        <!-- Fin -->
+                        <path d="M 120,120 Q 180,140 120,160 Z" class="fill-green g-stroke" />
+                        <path d="M 110,40 Q 150,10 130,-10 Z" class="fill-green g-stroke" />
+                    </g>
+                </svg>`,
+            4: `<!-- Kangaroo (4) -->
+                <svg class="animal-svg" viewBox="0 0 200 300" id="svg-4">
+                    <g id="roo-group">
+                        <!-- Vertical line -->
+                        <line x1="140" y1="20" x2="140" y2="280" class="g-stroke" stroke-width="30" stroke-linecap="round" />
+                        <!-- Triangle / Legs -->
+                        <polygon points="140,200 40,200 140,80" class="fill-green g-stroke" />
+                        <!-- Head -->
+                        <circle cx="140" cy="50" r="30" class="fill-green g-stroke" />
+                        <!-- Snout -->
+                        <ellipse cx="110" cy="60" rx="20" ry="15" class="fill-green g-stroke" />
+                        <!-- Ears -->
+                        <path d="M 130,25 L 120,0 L 150,15 Z M 150,25 L 170,0 L 160,15 Z" class="fill-green g-stroke" />
+                        <!-- Eye -->
+                        <g class="eye"><circle cx="125" cy="50" r="8" class="fill-white g-stroke"/><circle cx="120" cy="50" r="4" class="fill-black pupil"/></g>
+                        <!-- Pouch / Baby -->
+                        <path d="M 100,160 Q 120,200 140,160" class="fill-yellow g-stroke" stroke-width="5" />
+                        <circle cx="120" cy="160" r="10" class="fill-yellow g-stroke" />
+                    </g>
+                </svg>`,
+            3: `<!-- Caterpillar (3) -->
+                <svg class="animal-svg" viewBox="0 0 200 300" id="svg-3">
+                    <g id="cat-group" transform="translate(100, 150)">
+                        <!-- Bottom loop -->
+                        <path d="M -20,0 A 60 60 0 1 0 -20,120" class="fill-red g-stroke" stroke-width="40" stroke-linecap="round" fill="none" />
+                        <!-- Top loop -->
+                        <path d="M -30,-120 A 60 60 0 1 1 -20,0" class="fill-red g-stroke" stroke-width="40" stroke-linecap="round" fill="none" />
+                        <!-- Head -->
+                        <circle cx="-30" cy="-120" r="35" class="fill-yellow g-stroke" />
+                        <!-- Eyes -->
+                        <g class="eye"><circle cx="-45" cy="-130" r="12" class="fill-white g-stroke"/><circle cx="-50" cy="-130" r="5" class="fill-black pupil"/></g>
+                        <g class="eye"><circle cx="-15" cy="-130" r="12" class="fill-white g-stroke"/><circle cx="-20" cy="-130" r="5" class="fill-black pupil"/></g>
+                        <!-- Antennae -->
+                        <path d="M -40,-150 Q -60,-180 -70,-160" class="g-stroke" fill="none" />
+                        <path d="M -20,-150 Q 0,-180 10,-160" class="g-stroke" fill="none" />
+                        <circle cx="-70" cy="-160" r="6" class="fill-red g-stroke" />
+                        <circle cx="10" cy="-160" r="6" class="fill-red g-stroke" />
+                        <!-- Tiny legs -->
+                        <line x1="20" y1="-50" x2="50" y2="-50" class="g-stroke" stroke-width="8" />
+                        <line x1="40" y1="-20" x2="70" y2="-20" class="g-stroke" stroke-width="8" />
+                        <line x1="40" y1="20" x2="70" y2="20" class="g-stroke" stroke-width="8" />
+                        <line x1="20" y1="50" x2="50" y2="50" class="g-stroke" stroke-width="8" />
+                    </g>
+                </svg>`,
+            2: `<!-- Swan (2) -->
+                <svg class="animal-svg" viewBox="0 0 200 300" id="svg-2">
+                    <g id="swan-group">
+                        <!-- Path of 2 -->
+                        <path d="M 40,100 A 60 60 0 1 1 160,100 Q 160,150 40,250 L 160,250" class="g-stroke fill-none" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" />
+                        <!-- Make it filled blue visually -->
+                        <path d="M 40,100 A 60 60 0 1 1 160,100 Q 160,150 40,250 L 160,250" class="g-stroke fill-blue" stroke-width="0" />
+                        <!-- Overriding fill -->
+                        <path d="M 40,100 A 60 60 0 1 1 160,100 Q 160,150 40,250 L 160,250" stroke="var(--g-blue)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                        <path d="M 40,100 A 60 60 0 1 1 160,100 Q 160,150 40,250 L 160,250" class="g-stroke" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                        
+                        <!-- The neck and body mask with proper colors -->
+                        <path d="M 40,100 A 60 60 0 1 1 160,100 C 160,150 100,200 40,250 L 160,250 C 160,220 100,200 80,190 C 100,160 120,130 120,100 A 20 20 0 1 0 80,100 C 80,110 70,120 40,100 Z" class="fill-blue g-stroke" />
+
+                        <!-- Head extension -->
+                        <circle cx="40" cy="100" r="20" class="fill-blue g-stroke" />
+                        <!-- Beak -->
+                        <polygon points="20,100 -10,110 20,120" class="fill-yellow g-stroke" />
+                        <!-- Eye -->
+                        <g class="eye"><circle cx="35" cy="95" r="6" class="fill-white g-stroke"/><circle cx="32" cy="95" r="3" class="fill-black pupil"/></g>
+                        <!-- Wing -->
+                        <path d="M 80,220 Q 120,180 140,220 Z" class="fill-white g-stroke" />
+                    </g>
+                </svg>`,
+            1: `<!-- Penguin (1) -->
+                <svg class="animal-svg" viewBox="0 0 200 300" id="svg-1">
+                    <g id="pen-group" transform="translate(100, 150)">
+                        <!-- Main Body -->
+                        <rect x="-35" y="-120" width="70" height="240" rx="35" class="fill-black g-stroke" />
+                        <!-- White Belly -->
+                        <rect x="-25" y="-80" width="50" height="180" rx="25" class="fill-white" />
+                        <!-- Top Beak -->
+                        <path d="M -30,-90 L -60,-80 L -30,-70 Z" class="fill-yellow g-stroke" />
+                        <!-- Flipper (flat to side) -->
+                        <path d="M -35,0 L -55,80 L -35,70 Z" class="fill-black g-stroke" />
+                        <path d="M 35,0 L 55,80 L 35,70 Z" class="fill-black g-stroke" />
+                        <!-- Feet -->
+                        <path d="M -30,120 L -40,140 L -10,140 Z M 30,120 L 40,140 L 10,140 Z" class="fill-yellow g-stroke" />
+                        <!-- Eye -->
+                        <g class="eye"><circle cx="-15" cy="-100" r="10" class="fill-white g-stroke"/><circle cx="-20" cy="-100" r="5" class="fill-black pupil"/></g>
+                        <g class="eye"><circle cx="15" cy="-100" r="10" class="fill-white g-stroke"/><circle cx="10" cy="-100" r="5" class="fill-black pupil"/></g>
+                    </g>
+                </svg>`,
+            0: `<!-- Ring of Animals (0) -->
+                <svg class="animal-svg" viewBox="0 0 300 300" id="svg-0">
+                    <g id="ring-group" transform="translate(150, 150)">
+                        <!-- Main Ring Path for visual -->
+                        <circle cx="0" cy="0" r="100" class="fill-none g-stroke" stroke-width="40" />
+                        <circle cx="0" cy="0" r="100" class="fill-none" stroke="var(--g-green)" stroke-width="38" />
+                        
+                        <!-- Mini animals forming the ring -->
+                        <!-- Top: Frog -->
+                        <g transform="translate(0, -100)">
+                            <circle cx="0" cy="0" r="25" class="fill-green g-stroke" />
+                            <g class="eye"><circle cx="-10" cy="-15" r="8" class="fill-white g-stroke"/><circle cx="-10" cy="-15" r="4" class="fill-black pupil"/></g>
+                            <g class="eye"><circle cx="10" cy="-15" r="8" class="fill-white g-stroke"/><circle cx="10" cy="-15" r="4" class="fill-black pupil"/></g>
+                        </g>
+                        <!-- Right: Duck -->
+                        <g transform="translate(100, 0)">
+                            <circle cx="0" cy="0" r="25" class="fill-yellow g-stroke" />
+                            <polygon points="10,-5 30,0 10,5" class="fill-red g-stroke" />
+                            <g class="eye"><circle cx="5" cy="-10" r="6" class="fill-white g-stroke"/><circle cx="8" cy="-10" r="3" class="fill-black pupil"/></g>
+                        </g>
+                        <!-- Bottom: Mouse -->
+                        <g transform="translate(0, 100)">
+                            <circle cx="0" cy="0" r="25" class="fill-blue g-stroke" />
+                            <circle cx="-15" cy="-15" r="12" class="fill-blue g-stroke" />
+                            <circle cx="15" cy="-15" r="12" class="fill-blue g-stroke" />
+                            <g class="eye"><circle cx="-8" cy="0" r="6" class="fill-white g-stroke"/><circle cx="-8" cy="0" r="3" class="fill-black pupil"/></g>
+                            <g class="eye"><circle cx="8" cy="0" r="6" class="fill-white g-stroke"/><circle cx="8" cy="0" r="3" class="fill-black pupil"/></g>
+                        </g>
+                        <!-- Left: Rabbit -->
+                        <g transform="translate(-100, 0)">
+                            <circle cx="0" cy="0" r="25" class="fill-red g-stroke" />
+                            <ellipse cx="-10" cy="-25" rx="8" ry="20" class="fill-red g-stroke" />
+                            <ellipse cx="10" cy="-25" rx="8" ry="20" class="fill-red g-stroke" />
+                            <g class="eye"><circle cx="-8" cy="-5" r="6" class="fill-white g-stroke"/><circle cx="-10" cy="-5" r="3" class="fill-black pupil"/></g>
+                            <g class="eye"><circle cx="8" cy="-5" r="6" class="fill-white g-stroke"/><circle cx="5" cy="-5" r="3" class="fill-black pupil"/></g>
+                        </g>
+                    </g>
+                </svg>`
+        };
+
+        const animalTexts = {
+            10: { text: "YUM!", color: "var(--g-blue)" },
+            9: { text: "WHEEE!", color: "var(--g-red)" },
+            8: { text: "HOO HOO!", color: "var(--g-yellow)" },
+            7: { text: "TADA!", color: "var(--g-blue)" },
+            6: { text: "TOOT!", color: "var(--g-green)" },
+            5: { text: "Bloop!", color: "var(--g-red)" },
+            4: { text: "BOING!", color: "var(--g-blue)" },
+            3: { text: "Munch!", color: "var(--g-yellow)" },
+            2: { text: "SWISH!", color: "var(--g-green)" },
+            1: { text: "HI!", color: "var(--g-red)" },
+            0: { text: "YAY!", color: "var(--g-blue)" }
+        };
+
+        const animalNames = {
+            10: "Giraffe (1) & Egg (0)",
+            9: "Monkey (9)",
+            8: "Two Owls (8)",
+            7: "Flamingo (7)",
+            6: "Elephant (6)",
+            5: "Seahorse (5)",
+            4: "Kangaroo (4)",
+            3: "Caterpillar (3)",
+            2: "Swan (2)",
+            1: "Penguin (1)",
+            0: "Ring of Animals (0)"
+        };
+
+        // --- AUDIO SYSTEM (Web Audio API Synthesizer) ---
+        // Keeps it self-contained without external MP3s
+        const AudioSys = {
+            ctx: null,
+            enabled: false,
+            init: function() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+                this.enabled = true;
+                this.playChord(400, 'sine', 0.1); // Setup beep
+            },
+            toggle: function() {
+                if(!this.enabled) this.init();
+                else this.enabled = false;
+                return this.enabled;
+            },
+            playTone: function(freq, type, duration, vol=0.1, sweep=null) {
+                if(!this.enabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                if(sweep) {
+                    osc.frequency.exponentialRampToValueAtTime(sweep, this.ctx.currentTime + duration);
+                }
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+            playChord: function(baseFreq, type, duration) {
+                this.playTone(baseFreq, type, duration, 0.05);
+                this.playTone(baseFreq * 1.25, type, duration, 0.05);
+                this.playTone(baseFreq * 1.5, type, duration, 0.05);
+            },
+            playNoise: function(duration, vol=0.1) {
+                if(!this.enabled || !this.ctx) return;
+                const bufferSize = this.ctx.sampleRate * duration;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                noise.connect(gain);
+                gain.connect(this.ctx.destination);
+                noise.start();
+            },
+            triggerAnimalSound: function(num) {
+                if(!this.enabled) return;
+                switch(num) {
+                    case 10: this.playTone(300, 'square', 0.2); setTimeout(()=>this.playNoise(0.1), 100); break; // Gulp
+                    case 9: this.playTone(600, 'sine', 0.3, 0.1, 300); break; // Monkey
+                    case 8: this.playTone(400, 'sine', 0.2); setTimeout(()=>this.playTone(400, 'sine', 0.2), 200); break; // Hoo hoo
+                    case 7: this.playTone(800, 'sawtooth', 0.15); break; // Honk
+                    case 6: this.playTone(200, 'sawtooth', 0.5, 0.1, 400); break; // Trumpet
+                    case 5: this.playTone(1000, 'sine', 0.1); setTimeout(()=>this.playTone(1200, 'sine', 0.1), 100); break; // Bubbles
+                    case 4: this.playTone(300, 'triangle', 0.2, 0.1, 600); break; // Boing
+                    case 3: this.playNoise(0.05); setTimeout(()=>this.playNoise(0.05), 100); break; // Munch
+                    case 2: this.playNoise(0.4, 0.05); break; // Swish
+                    case 1: this.playTone(700, 'sine', 0.3, 0.1, 900); break; // Whee
+                    case 0: this.playChord(500, 'triangle', 0.5); break; // Yay
+                }
+            },
+            triggerFinale: function() {
+                if(!this.enabled) return;
+                this.playChord(440, 'square', 0.5);
+                setTimeout(()=>this.playChord(554, 'square', 0.5), 200);
+                setTimeout(()=>this.playChord(659, 'square', 1.0), 400);
+                this.playNoise(2.0, 0.1); // Crowd cheer approximation
+            }
+        };
+
+        // --- APP LOGIC ---
+        const App = {
+            currentNumber: 10,
+            isPlaying: false,
+            speedMultiplier: 1.0,
+            theme: 'light',
+            container: document.getElementById('number-container'),
+            speech: document.getElementById('speech'),
+            ioLogo: document.getElementById('io-logo'),
+            animalLabel: document.getElementById('animal-label'),
+            currentAnim: null,
+            timeoutId: null,
+            actionTimeoutId: null,
+            exitTimeoutId: null,
+
+            init: function() {
+                this.setupUI();
+                this.renderNumber(this.currentNumber, false);
+                this.setupEyeTracking();
+                this.setupKonami();
+            },
+
+            setupUI: function() {
+                // Populate Gallery
+                const gal = document.getElementById('gallery');
+                for(let i=10; i>=0; i--) {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full aspect-square rounded-xl bg-gray-100 dark:bg-gray-700 font-bold text-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border-2 border-transparent';
+                    btn.innerText = i;
+                    btn.onclick = () => {
+                        this.currentNumber = i;
+                        this.pause();
+                        this.renderNumber(i, true);
+                    };
+                    gal.appendChild(btn);
+                }
+
+                // Buttons
+                document.getElementById('btn-play').onclick = () => this.togglePlay();
+                document.getElementById('btn-prev').onclick = () => this.jump(1);
+                document.getElementById('btn-next').onclick = () => this.jump(-1);
+                
+                const speedSlider = document.getElementById('speed-slider');
+                const speedDisplay = document.getElementById('speed-display');
+                speedSlider.oninput = (e) => {
+                    this.speedMultiplier = parseFloat(e.target.value);
+                    speedDisplay.innerText = this.speedMultiplier.toFixed(2) + 'x';
+                };
+
+                const soundBtn = document.getElementById('btn-sound');
+                soundBtn.onclick = () => {
+                    const active = AudioSys.toggle();
+                    soundBtn.innerHTML = active ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+                    soundBtn.classList.toggle('bg-[#34A853]', active);
+                    soundBtn.classList.toggle('bg-gray-400', !active);
+                };
+
+                const themeBtn = document.getElementById('btn-theme');
+                themeBtn.onclick = () => {
+                    document.body.classList.toggle('dark-mode');
+                    const isDark = document.body.classList.contains('dark-mode');
+                    themeBtn.innerHTML = isDark ? '☀️ Light' : '🌙 Dark';
+                };
+
+                const fullscreenBtn = document.getElementById('btn-fullscreen');
+                fullscreenBtn.onclick = () => {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(err => {
+                            console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                        });
+                    } else {
+                        document.exitFullscreen();
+                    }
+                };
+
+                document.addEventListener('fullscreenchange', () => {
+                    fullscreenBtn.innerHTML = document.fullscreenElement ? '🔳 Exit Full' : '🔲 Fullscreen';
+                });
+
+                const panel = document.getElementById('control-panel');
+                document.getElementById('toggle-panel').onclick = () => {
+                    panel.classList.toggle('collapsed');
+                };
+
+                // Keyboard
+                document.addEventListener('keydown', (e) => {
+                    if(e.code === 'Space') { e.preventDefault(); this.togglePlay(); }
+                    if(e.code === 'ArrowRight') this.jump(-1);
+                    if(e.code === 'ArrowLeft') this.jump(1);
+                    if(e.code === 'KeyM') soundBtn.click();
+                    if(e.code === 'KeyF') fullscreenBtn.click();
+                });
+            },
+
+            togglePlay: function() {
+                this.isPlaying = !this.isPlaying;
+                const btn = document.getElementById('btn-play');
+                btn.innerText = this.isPlaying ? '⏸' : '▶️';
+                if(this.isPlaying) {
+                    if (this.currentNumber < 0) this.currentNumber = 10;
+                    this.playSequence();
+                } else {
+                    this.clearTimeouts();
+                    if(this.currentAnim) this.currentAnim.pause();
+                }
+            },
+            
+            clearTimeouts: function() {
+                if(this.timeoutId) clearTimeout(this.timeoutId);
+                if(this.actionTimeoutId) clearTimeout(this.actionTimeoutId);
+                if(this.exitTimeoutId) clearTimeout(this.exitTimeoutId);
+            },
+
+            jump: function(dir) {
+                this.currentNumber += dir;
+                if(this.currentNumber > 10) this.currentNumber = 10;
+                if(this.currentNumber < 0) this.currentNumber = 0;
+                this.pause();
+                this.renderNumber(this.currentNumber, true);
+            },
+
+            pause: function() {
+                this.isPlaying = false;
+                document.getElementById('btn-play').innerText = '▶️';
+                this.clearTimeouts();
+                if(this.currentAnim) this.currentAnim.pause();
+            },
+
+            renderNumber: function(num, animateIn=false) {
+                // Update active gallery button
+                const btns = document.getElementById('gallery').children;
+                Array.from(btns).forEach((btn, idx) => {
+                    if(10 - idx === num) {
+                        btn.classList.add('border-[#4285F4]', 'bg-blue-50', 'dark:bg-blue-900');
+                    } else {
+                        btn.classList.remove('border-[#4285F4]', 'bg-blue-50', 'dark:bg-blue-900');
+                    }
+                });
+
+                this.ioLogo.style.opacity = '0';
+                this.speech.style.opacity = '0';
+                
+                // Clear existing SVGs except absolute UI
+                Array.from(this.container.children).forEach(child => {
+                    if(child.id !== 'speech' && child.id !== 'io-logo' && child.id !== 'animal-label') {
+                        child.remove();
+                    }
+                });
+
+                if (num < 0) return;
+
+                // Update animal name label
+                this.animalLabel.innerText = animalNames[num];
+                anime({
+                    targets: this.animalLabel,
+                    opacity: [0, 1],
+                    translateY: [10, 0],
+                    duration: 500,
+                    easing: 'easeOutCubic'
+                });
+
+                // Inject new SVG using HTML parser to guarantee proper DOM node properties (fixes missing .style error)
+                this.container.insertAdjacentHTML('beforeend', animalSVGs[num]);
+                const svgNode = this.container.querySelector('.animal-svg');
+
+                if (animateIn) {
+                    anime({
+                        targets: svgNode,
+                        scale: [0, 1],
+                        rotate: [-10, 0],
+                        duration: 800 / this.speedMultiplier
+                    });
+                } else {
+                    // Idle breathe
+                    anime({
+                        targets: svgNode,
+                        scale: [1, 1.03],
+                        direction: 'alternate',
+                        loop: true,
+                        easing: 'easeInOutSine',
+                        duration: 1500
+                    });
+                }
+            },
+
+            playSequence: function() {
+                if(!this.isPlaying) return;
+                
+                if(this.currentNumber < 0) {
+                    this.triggerFinale();
+                    return;
+                }
+
+                this.renderNumber(this.currentNumber, false);
+                const svg = this.container.querySelector('.animal-svg');
+                
+                this.clearTimeouts();
+
+                // EXACTLY 1 second base duration when speed = 1.0x
+                const duration = 1000 / this.speedMultiplier;
+                
+                // 1. Enter (0% -> 40%)
+                anime({
+                    targets: svg,
+                    scaleX: [0.5, 1.2, 1],
+                    scaleY: [1.5, 0.8, 1],
+                    translateY: [-100, 0],
+                    easing: 'easeOutElastic(1, .5)',
+                    duration: duration * 0.4
+                });
+
+                // 2. Action: Speech & Blink (Triggered at 25%)
+                this.actionTimeoutId = setTimeout(() => {
+                    if(!this.isPlaying) return;
+                    AudioSys.triggerAnimalSound(this.currentNumber);
+                    
+                    // Speech bubble
+                    const data = animalTexts[this.currentNumber];
+                    this.speech.innerText = data.text;
+                    this.speech.style.background = data.color;
+                    
+                    anime({
+                        targets: this.speech,
+                        opacity: [0, 1],
+                        scale: [0, 1.2, 1],
+                        rotate: [-10, 10, -5],
+                        duration: duration * 0.3,
+                        easing: 'easeOutBack'
+                    });
+
+                    // Blink eyes
+                    const eyes = svg.querySelectorAll('.eye circle:first-child');
+                    if(eyes.length) {
+                        anime({
+                            targets: eyes,
+                            scaleY: [1, 0.1, 1],
+                            duration: duration * 0.15,
+                            easing: 'easeInOutQuad'
+                        });
+                    }
+                    
+                }, duration * 0.25);
+
+                // 3. Exit (Triggered at 75%)
+                this.exitTimeoutId = setTimeout(() => {
+                    if(!this.isPlaying) return;
+                    
+                    // Hide speech
+                    anime({ targets: this.speech, opacity: 0, scale: 0, duration: duration * 0.2 });
+
+                    // Unique exits
+                    let exitAnim = { targets: svg, duration: duration * 0.25, easing: 'easeInBack' };
+                    switch(this.currentNumber) {
+                        case 10: exitAnim.translateX = 500; exitAnim.opacity = 0; break;
+                        case 9: exitAnim.translateY = 500; exitAnim.rotate = 45; break;
+                        case 8: 
+                            anime({ targets: '#owl-top', translateX: -300, translateY: -200, opacity: 0, duration: duration * 0.25 });
+                            anime({ targets: '#owl-bottom', translateX: 300, translateY: -200, opacity: 0, duration: duration * 0.25 });
+                            exitAnim = null; break;
+                        case 7: exitAnim.translateX = -500; exitAnim.rotate = -45; break;
+                        case 6: exitAnim.translateX = 400; exitAnim.scale = 1.2; break;
+                        case 5: exitAnim.translateY = -500; exitAnim.scale = [1, 0.2]; break; // Torpedo
+                        case 4: exitAnim.translateY = -800; exitAnim.scaleY = 1.5; break; // Jump
+                        case 3: exitAnim.translateX = 400; exitAnim.scaleX = 1.5; break; // Slither
+                        case 2: exitAnim.translateY = -400; exitAnim.opacity = 0; break; // Fly
+                        case 1: exitAnim.translateX = 600; exitAnim.rotate = 90; break; // Slide
+                        case 0: exitAnim.rotate = 720; exitAnim.scale = 0; break; // Spin to 0
+                    }
+
+                    if(exitAnim) this.currentAnim = anime(exitAnim);
+
+                }, duration * 0.75);
+                
+                // 4. Loop to Next Number (Triggered EXACTLY at 100%)
+                this.timeoutId = setTimeout(() => {
+                    this.currentNumber--;
+                    this.playSequence();
+                }, duration);
+            },
+
+            triggerFinale: function() {
+                this.pause(); // stop standard loop
+                AudioSys.triggerFinale();
+                
+                // Clear SVG
+                const svg = this.container.querySelector('.animal-svg');
+                if(svg) svg.remove();
+                
+                // Hide label
+                anime({ targets: this.animalLabel, opacity: 0, duration: 300 });
+
+                // Show I/O Logo
+                anime({
+                    targets: this.ioLogo,
+                    opacity: 1,
+                    scale: [0.5, 1.2, 1],
+                    rotate: [-5, 0],
+                    duration: 1000,
+                    easing: 'easeOutElastic(1, .5)'
+                });
+
+                // Confetti Burst
+                var duration = 2000;
+                var end = Date.now() + duration;
+                var colors = ['#4285F4', '#EA4335', '#FBBC04', '#34A853'];
+
+                (function frame() {
+                    confetti({
+                        particleCount: 5,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0 },
+                        colors: colors,
+                        zIndex: 100
+                    });
+                    confetti({
+                        particleCount: 5,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1 },
+                        colors: colors,
+                        zIndex: 100
+                    });
+
+                    if (Date.now() < end) {
+                        requestAnimationFrame(frame);
+                    }
+                }());
+
+                // Restart after hold
+                setTimeout(() => {
+                    anime({
+                        targets: this.ioLogo,
+                        opacity: 0,
+                        scale: 0.5,
+                        duration: 500,
+                        complete: () => {
+                            this.currentNumber = 10;
+                            if(document.getElementById('btn-play').innerText === '⏸') {
+                                this.isPlaying = true;
+                                this.playSequence();
+                            } else {
+                                this.renderNumber(10, true);
+                            }
+                        }
+                    });
+                }, 3000);
+            },
+
+            setupEyeTracking: function() {
+                document.addEventListener('mousemove', (e) => {
+                    const pupils = document.querySelectorAll('.pupil');
+                    pupils.forEach(pupil => {
+                        const rect = pupil.getBoundingClientRect();
+                        const x = rect.left + rect.width / 2;
+                        const y = rect.top + rect.height / 2;
+                        
+                        const deltaX = e.clientX - x;
+                        const deltaY = e.clientY - y;
+                        const angle = Math.atan2(deltaY, deltaX);
+                        
+                        // Limit movement
+                        const maxDist = 3;
+                        const moveX = Math.cos(angle) * maxDist;
+                        const moveY = Math.sin(angle) * maxDist;
+                        
+                        pupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                    });
+                });
+            },
+
+            setupKonami: function() {
+                const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','KeyB','KeyA'];
+                let konamiIdx = 0;
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === konami[konamiIdx]) {
+                        konamiIdx++;
+                        if (konamiIdx === konami.length) {
+                            this.triggerDanceParty();
+                            konamiIdx = 0;
+                        }
+                    } else {
+                        konamiIdx = 0;
+                    }
+                });
+            },
+
+            triggerDanceParty: function() {
+                AudioSys.playChord(800, 'square', 1.0);
+                confetti({ particleCount: 150, spread: 180, colors: ['#4285F4', '#EA4335', '#FBBC04', '#34A853'] });
+                
+                const svg = this.container.querySelector('.animal-svg');
+                if(svg) {
+                    anime({
+                        targets: svg,
+                        rotate: '1turn',
+                        scale: [1, 1.5, 1],
+                        duration: 1000,
+                        direction: 'alternate',
+                        loop: 4,
+                        easing: 'easeInOutSine'
+                    });
+                }
+                
+                // Flash bg
+                const origBg = document.body.style.backgroundColor;
+                let cIdx = 0;
+                const colors = ['#4285F4', '#EA4335', '#FBBC04', '#34A853'];
+                const interval = setInterval(() => {
+                    document.body.style.backgroundColor = colors[cIdx % colors.length];
+                    cIdx++;
+                }, 100);
+
+                setTimeout(() => {
+                    clearInterval(interval);
+                    document.body.style.backgroundColor = origBg;
+                }, 4000);
+            }
+        };
+
+        // Boot
+        window.onload = () => {
+            App.init();
+        };
+
+    </script>
+</body>
+</html>
