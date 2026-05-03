@@ -24,8 +24,7 @@ entirely with Gemini Canvas in a single HTML file.
 
 ## 🎬 Demo
 
-📹 **[Watch the 18s YouTube demo video](https://youtu.be/Z84kXKk6c4Y)**
-🔗 **[Live Demo without sound in gif](https://github.com/leewalter/CodeTheCountdown-IO2026/blob/main/countdown-IO-26.gif)**  
+📹 **[Watch the 18s YouTube demo video](https://youtu.be/Z84kXKk6c4Y)** <br>
 🔗 **[Live Demo with sound in mp4](https://github.com/leewalter/CodeTheCountdown-IO2026/blob/main/countdown-IO-26.mp4)**  
 
 
