@@ -24,10 +24,12 @@ entirely with Gemini Canvas in a single HTML file.
 
 ## 🎬 Demo
 
-🔗 **[Live Demo](https://your-link-here.com)**  
-📹 **[Watch the 11s video](https://your-video-link.com)**
+📹 **[Watch the 18s YouTube demo video](https://youtu.be/Z84kXKk6c4Y)**
+🔗 **[Live Demo without sound in gif](https://github.com/leewalter/CodeTheCountdown-IO2026/blob/main/countdown-IO-26.gif)**  
+🔗 **[Live Demo with sound in mp4](https://github.com/leewalter/CodeTheCountdown-IO2026/blob/main/countdown-IO-26.mp4)**  
 
-![Countdown Preview](./preview.gif)
+
+![Countdown Preview](./countdown-IO-26.gif)
 
 ## 🐾 The Cast
 
@@ -63,7 +65,7 @@ entirely with Gemini Canvas in a single HTML file.
 - 🐾 Animal gallery — preview any number instantly
 - 📸 Built-in GIF/MP4 recorder
 - ⌨️ Keyboard shortcuts (Space, R, ←/→, M, F, 0–9)
-- 🥚 Konami-code Easter egg
+- 🥚 Konami-code Easter egg (↑ ↑ ↓ ↓ ← → ← → B A)
 
 ## 🛠️ Built With
 
@@ -76,8 +78,8 @@ entirely with Gemini Canvas in a single HTML file.
 ## 🚀 Run Locally
 
 ```bash
-git clone https://github.com/walter/animal-countdown
-cd animal-countdown
+git clone https://github.com/leewalter/CodeTheCountdown-IO2026
+cd CodeTheCountdown-IO2026
 open index.html
 ```
 
@@ -89,5 +91,5 @@ MIT — go make something joyful.
 
 ---
 
-Built with ❤️ by Walter for **Google I/O 2026**.  
+Built with ❤️ by Walter Lee (GDE) for **Google I/O 2026**.  
 *See you in the front row on May 19. 🎉*
